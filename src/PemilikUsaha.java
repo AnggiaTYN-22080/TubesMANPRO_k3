@@ -489,4 +489,73 @@ class PemilikUsaha extends User {
         }
         KelolaVendor();
     }
+
+    private void KelolaJenisVendor() {
+        Scanner sc = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("\n====================================");
+            System.out.println("           DAFTAR JENIS VENDOR      ");
+            System.out.println("====================================");
+
+            String sql = "SELECT IdJenisVendor, Nama FROM JenisVendor";
+
+            try (Connection conn = DBConnection.getConnection();
+                PreparedStatement stmt = conn.prepareStatement(sql);
+                ResultSet rs = stmt.executeQuery()) {
+
+                System.out.printf("%-5s | %-20s\n", "ID", "Nama Jenis Vendor");
+                System.out.println("------------------------------------");
+
+                while (rs.next()) {
+                    System.out.printf("%-5d | %-20s\n",
+                            rs.getInt("IdJenisVendor"),
+                            rs.getString("Nama"));
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            // MENU
+            System.out.println("\nMenu:");
+            System.out.println("1. Tambah Jenis Vendor");
+            System.out.println("0. Kembali");
+            System.out.print("Pilih menu: ");
+            int pilihan = sc.nextInt();
+            sc.nextLine();
+
+            switch (pilihan) {
+                case 1 -> TambahJenisVendor();
+                case 0 -> {
+                    PUHome();
+                    return; // kembali ke menu sebelumnya
+                }
+                default -> {
+                    System.out.println("Pilihan tidak valid.");
+                    KelolaJenisVendor();
+                }
+            }
+        }
+    }
+
+    private void TambahJenisVendor() {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Masukkan nama jenis vendor baru: ");
+        String namaJenis = sc.nextLine();
+
+        String sql = "INSERT INTO JenisVendor (Nama) VALUES (?)";
+
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, namaJenis);
+            stmt.executeUpdate();
+            System.out.println("Jenis vendor berhasil ditambahkan!");
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        KelolaJenisVendor();
+    }
 }
