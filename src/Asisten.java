@@ -175,4 +175,90 @@ public class Asisten extends User {
             }
         } while (choice != 0);
     }
+
+    private void handleAlokasikanVendor(Connection conn, Scanner sc) {
+        int choice;
+        do {
+            System.out.println("\n--- ALOKASI VENDOR KE EVENT ---");
+            System.out.println("1. Lanjutkan Alokasi");
+            System.out.println("0. Kembali ke Menu Utama");
+            System.out.print("Pilih menu: ");
+
+            if (sc.hasNextInt()) {
+                choice = sc.nextInt();
+                sc.nextLine();
+
+                if (choice == 1) {
+                    try {
+                        System.out.print("ID Event: ");
+                        int idEvent = sc.nextInt();
+                        
+                        System.out.print("ID Vendor: ");
+                        int idVendor = sc.nextInt();
+                        
+                        System.out.print("Harga Dealing (DECIMAL/Double): ");
+                        double hargaDealing = sc.nextDouble();
+                        sc.nextLine();
+
+                        alokasikanVendorKeEvent(conn, idEvent, idVendor, hargaDealing); 
+                        
+                        choice = 0; 
+                    } catch (java.util.InputMismatchException e) {
+                        System.err.println("Input tidak valid. Pastikan ID Event, ID Vendor, dan Harga Dealing adalah angka.");
+                        sc.nextLine(); 
+                        choice = -1;
+                    }
+
+                } else if (choice == 0) {
+                    System.out.println("Membatalkan alokasi vendor.");
+                } else {
+                    System.out.println("Pilihan tidak valid.");
+                }
+            } else {
+                System.out.println("Input tidak valid. Silakan masukkan angka.");
+                sc.nextLine(); 
+                choice = -1;
+            }
+        } while (choice != 0);
+    }
+
+    private void handleUpdateStatusEvent(Connection conn, Scanner sc) {
+        int choice;
+        do {
+            System.out.println("\n--- UPDATE STATUS EVENT ---");
+            System.out.println("1. Lanjutkan Update Status");
+            System.out.println("0. Kembali ke Menu Utama");
+            System.out.print("Pilih menu: ");
+
+            if (sc.hasNextInt()) {
+                choice = sc.nextInt();
+                sc.nextLine(); 
+
+                if (choice == 1) {
+                    try {
+                        System.out.print("ID Event yang akan diupdate: ");
+                        int idEvent = sc.nextInt();
+                        sc.nextLine(); 
+                        System.out.print("Status Baru (cth: Selesai, Dibatalkan, On Progress): ");
+                        String statusBaru = sc.nextLine();
+
+                        updateStatusEvent(conn, idEvent, statusBaru);
+                        choice = 0; 
+                    } catch (java.util.InputMismatchException e) {
+                        System.err.println("Input ID Event tidak valid. Silakan coba lagi.");
+                        sc.nextLine(); 
+                        choice = -1;
+                    }
+                } else if (choice == 0) {
+                    System.out.println("Membatalkan update status event.");
+                } else {
+                    System.out.println("Pilihan tidak valid.");
+                }
+            } else {
+                System.out.println("Input tidak valid. Silakan masukkan angka.");
+                sc.nextLine(); 
+                choice = -1;
+            }
+        } while (choice != 0);
+    }
 }
