@@ -1,4 +1,5 @@
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
@@ -260,5 +261,64 @@ public class Asisten extends User {
                 choice = -1;
             }
         } while (choice != 0);
+    }
+
+    public List<String> lihatDaftarKlien(Connection conn) {
+        List<String> daftarKlien = new ArrayList<>();
+        String sql = "SELECT IdKlien, Nama, Alamat, NoTelp, Email FROM Klien";
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try {
+            ps = conn.prepareStatement(sql);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                int id = rs.getInt("IdKlien");
+                String nama = rs.getString("Nama");
+                String alamat = rs.getString("Alamat");
+                String noTelp = rs.getString("NoTelp");
+                String email = rs.getString("Email");
+                daftarKlien.add(String.format("ID: %d | Nama: %s | Alamat: %s | NoTelp: %s | Email: %s", id, nama, alamat, noTelp, email));
+            }
+        } catch (SQLException e) {
+            System.err.println(" Gagal melihat daftar klien: " + e.getMessage());
+        } finally {
+            closeResources(ps, rs);
+        }
+        return daftarKlien;
+    }
+
+    public boolean tambahEvent(Connection conn, String namaEvent, String tanggal, int jumlahUndangan, double budget, int idJenisEvent, int idKlien, int idAsisten) {
+
+        String sql = "INSERT INTO [Event] (Nama, Tanggal, JumlahUndangan, Status, Budget, IdJenisEvent, IdKlien, IdAsisten) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        PreparedStatement ps = null;
+
+        try {
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, namaEvent); 
+            ps.setString(2, tanggal); 
+            ps.setInt(3, jumlahUndangan);
+            ps.setString(4, "Terjadwal"); 
+            ps.setDouble(5, budget);
+            ps.setInt(6, idJenisEvent);
+            ps.setInt(7, idKlien);
+            ps.setInt(8, idAsisten); 
+            
+            int affectedRows = ps.executeUpdate();
+            
+            if (affectedRows > 0) {
+                System.out.println(" Event '" + namaEvent + "' berhasil ditambahkan.");
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (SQLException e) {
+            System.err.println(" Gagal menambahkan event. Pastikan ID Klien, ID Jenis Event, dan format tanggal valid. Pesan: " + e.getMessage());
+            return false;
+        } finally {
+            closeResources(ps, null);
+        }
     }
 }
