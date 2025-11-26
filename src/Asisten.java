@@ -321,4 +321,58 @@ public class Asisten extends User {
             closeResources(ps, null);
         }
     }
+
+    public boolean alokasikanVendorKeEvent(Connection conn, int idEvent, int idVendor, double hargaDealing) {
+        String sql = "INSERT INTO EventVendor (IdEvent, IdVendor, HargaDealing) VALUES (?, ?, ?)";
+        PreparedStatement ps = null;
+
+        try {
+            ps = conn.prepareStatement(sql);
+            ps.setInt(1, idEvent);
+            ps.setInt(2, idVendor);
+            ps.setDouble(3, hargaDealing);
+
+            int affectedRows = ps.executeUpdate();
+            
+            if (affectedRows > 0) {
+                System.out.println(" Vendor ID " + idVendor + " berhasil dialokasikan ke Event ID " + idEvent + " dengan Harga Dealing: " + hargaDealing + ".");
+                return true;
+            } else {
+                return false;
+            }
+
+        } catch (SQLException e) {
+            System.err.println(" Gagal mengalokasikan vendor. Pastikan ID Event dan ID Vendor valid. Pesan: " + e.getMessage());
+            return false;
+        } finally {
+            closeResources(ps, null);
+        }
+    }
+    
+    public boolean updateStatusEvent(Connection conn, int idEvent, String statusBaru) {
+        String sql = "UPDATE [Event] SET Status = ? WHERE IdEvent = ?";
+        PreparedStatement ps = null;
+
+        try {
+            ps = conn.prepareStatement(sql);
+            ps.setString(1, statusBaru);
+            ps.setInt(2, idEvent);
+            
+            int affectedRows = ps.executeUpdate();
+            
+            if (affectedRows > 0) {
+                System.out.println(" Status Event ID " + idEvent + " berhasil diupdate menjadi '" + statusBaru + "'.");
+                return true;
+            } else {
+                System.out.println(" Gagal update. Event ID " + idEvent + " mungkin tidak ditemukan.");
+                return false;
+            }
+
+        } catch (SQLException e) {
+            System.err.println(" Gagal mengupdate status event: " + e.getMessage());
+            return false;
+        } finally {
+            closeResources(ps, null);
+        }
+    }
 }
