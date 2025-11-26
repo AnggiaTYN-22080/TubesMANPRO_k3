@@ -558,4 +558,170 @@ class PemilikUsaha extends User {
         }
         KelolaJenisVendor();
     }
+     private void KelolaLaporanEvent() {
+        Scanner sc = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("\n====================================");
+            System.out.println("MENU LAPORAN EVENT :      ");
+            System.out.println("1. Event On Progress");
+            System.out.println("2. Event Akan Datang");
+            System.out.println("3. Event Selesai");
+            System.out.println("0. Kembali");
+            System.out.print("Pilih menu: ");
+
+            int menu = sc.nextInt();
+            sc.nextLine();
+
+            String status = null;
+
+            switch (menu) {
+                case 1 -> status = "On Progress";
+                case 2 -> status = "Akan Datang";
+                case 3 -> status = "Selesai";
+                case 0 -> { 
+                    PUHome();
+                    return; }
+                default -> {
+                    System.out.println("Pilihan tidak valid!");
+                    KelolaLaporanEvent();
+                    continue;
+                }
+            }
+
+            TampilkanDaftarEvent(status);
+
+            System.out.print("\nMasukkan ID Event yang ingin dilihat (0 untuk kembali): ");
+            int idEvent = sc.nextInt();
+            sc.nextLine();
+
+            if (idEvent == 0) continue;
+
+            TampilkanDetailEvent(idEvent);
+        }
+    }
+
+    private void TampilkanDaftarEvent(String status) {
+        String sql = """
+            SELECT 
+                e.IdEvent,
+                e.Nama,
+                u_k.Nama AS NamaKlien,
+                u_a.Nama AS NamaAsisten,
+                e.Tanggal
+            FROM Event e
+            JOIN Klien k ON e.IdKlien = k.IdKlien
+            JOIN [User] u_k ON k.IdKlien = u_k.IdUser
+            JOIN Asisten a ON e.IdAsisten = a.IdAsisten
+            JOIN [User] u_a ON a.IdAsisten = u_a.IdUser
+            WHERE e.Status = ?
+            ORDER BY e.Tanggal ASC
+        """;
+
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, status);
+            ResultSet rs = stmt.executeQuery();
+
+            System.out.println("\n==========================================");
+            System.out.println("  DAFTAR EVENT (" + status + ")");
+            System.out.println("==========================================");
+            System.out.printf("%-5s | %-20s | %-15s | %-15s | %-12s\n",
+                    "ID", "Nama Event", "Klien", "Asisten", "Tanggal");
+            System.out.println("------------------------------------------------------------------------");
+
+            boolean adaData = false;
+
+            while (rs.next()) {
+                adaData = true;
+                System.out.printf("%-5d | %-20s | %-15s | %-15s | %-12s\n",
+                        rs.getInt("IdEvent"),
+                        rs.getString("Nama"),
+                        rs.getString("NamaKlien"),
+                        rs.getString("NamaAsisten"),
+                        rs.getDate("Tanggal"));
+            }
+
+            if (!adaData) {
+                System.out.println("Tidak ada event dengan status tersebut.");
+                KelolaLaporanEvent();
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void TampilkanDetailEvent(int idEvent) {
+        String sqlEvent = """
+            SELECT 
+                e.Nama,
+                u_k.Nama AS NamaKlien,
+                u_a.Nama AS NamaAsisten,
+                e.Tanggal
+            FROM Event e
+            JOIN Klien k ON e.IdKlien = k.IdKlien
+            JOIN [User] u_k ON k.IdKlien = u_k.IdUser
+            JOIN Asisten a ON e.IdAsisten = a.IdAsisten
+            JOIN [User] u_a ON a.IdAsisten = u_a.IdUser
+            WHERE e.IdEvent = ?
+        """;
+
+        String sqlVendor = """
+            SELECT 
+                v.Nama,
+                jv.Nama AS JenisVendor,
+                v.Harga
+            FROM EventVendor ev
+            JOIN Vendor v ON ev.IdVendor = v.IdVendor
+            JOIN JenisVendor jv ON v.IdJenisVendor = jv.IdJenisVendor
+            WHERE ev.IdEvent = ?
+        """;
+
+        try (Connection conn = DBConnection.getConnection();
+            PreparedStatement stmtEvent = conn.prepareStatement(sqlEvent);
+            PreparedStatement stmtVendor = conn.prepareStatement(sqlVendor)) {
+
+            stmtEvent.setInt(1, idEvent);
+            ResultSet rsEvent = stmtEvent.executeQuery();
+
+            if (!rsEvent.next()) {
+                System.out.println("Event tidak ditemukan.");
+                return;
+            }
+
+            System.out.println("\n==========================");
+            System.out.println("       DETAIL EVENT");
+            System.out.println("==========================");
+            System.out.println("Nama Event   : " + rsEvent.getString("Nama"));
+            System.out.println("Klien        : " + rsEvent.getString("NamaKlien"));
+            System.out.println("Asisten      : " + rsEvent.getString("NamaAsisten"));
+            System.out.println("Tanggal      : " + rsEvent.getDate("Tanggal"));
+            System.out.println("\nVendor yang Terlibat:");
+
+            stmtVendor.setInt(1, idEvent);
+            ResultSet rsVendor = stmtVendor.executeQuery();
+
+            double total = 0;
+
+            System.out.printf("\n%-20s | %-15s | %-10s\n", "Nama Vendor", "Jenis", "Harga");
+            System.out.println("--------------------------------------------------");
+
+            while (rsVendor.next()) {
+                System.out.printf("%-20s | %-15s | %-10.2f\n",
+                        rsVendor.getString("Nama"),
+                        rsVendor.getString("JenisVendor"),
+                        rsVendor.getDouble("Harga"));
+
+                total += rsVendor.getDouble("Harga");
+            }
+
+            DecimalFormat df = new DecimalFormat("#,###");
+            System.out.println("\nTotal Biaya Vendor: Rp " + df.format(total));
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
