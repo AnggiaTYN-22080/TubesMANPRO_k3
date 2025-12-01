@@ -16,7 +16,7 @@ public class Asisten extends User {
 
         try {
             ps = conn.prepareStatement(sql);
-            ps.setInt(1, this.getUserId());
+            ps.setInt(1, User.getUserId());
             rs = ps.executeQuery();
 
             if (rs.next()) {
@@ -115,7 +115,15 @@ public class Asisten extends User {
             System.out.println("--------------------");
         }
         try (Scanner tempSc = new Scanner(System.in)) { 
-             System.out.print("Tekan ENTER untuk kembali ke menu utama...");
+             System.out.print("0 untuk kembali ke menu utama...");
+             int opt = tempSc.nextInt();
+             if (opt==0) {
+                AsistenHome();
+             }
+             else{
+                System.out.println("Pilihan tidak valid!");
+                handleLihatKlien(conn);
+             }
              tempSc.nextLine(); 
         } catch (java.util.NoSuchElementException | IllegalStateException e) {
         }
@@ -153,7 +161,7 @@ public class Asisten extends User {
                         int idJenisEvent = sc.nextInt();
                         sc.nextLine(); 
                         
-                        int idAsisten = this.getUserId(); 
+                        int idAsisten = User.getUserId(); 
 
                         // Memanggil method dengan signature yang disesuaikan
                         tambahEvent(conn, namaEvent, tanggal, jumlahUndangan, budget, idJenisEvent, idKlien, idAsisten);
