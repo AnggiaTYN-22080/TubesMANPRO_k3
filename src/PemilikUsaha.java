@@ -627,7 +627,7 @@ class PemilikUsaha extends User {
             System.out.println("\n==========================================");
             System.out.println("  DAFTAR EVENT (" + status + ")");
             System.out.println("==========================================");
-            System.out.printf("%-5s | %-20s | %-15s | %-15s | %-12s\n",
+            System.out.printf("%-5s | %-30s | %-15s | %-15s | %-12s\n",
                     "ID", "Nama Event", "Klien", "Asisten", "Tanggal");
             System.out.println("------------------------------------------------------------------------");
 
@@ -635,7 +635,7 @@ class PemilikUsaha extends User {
 
             while (rs.next()) {
                 adaData = true;
-                System.out.printf("%-5d | %-20s | %-15s | %-15s | %-12s\n",
+                System.out.printf("%-5d | %-30s | %-15s | %-15s | %-12s\n",
                         rs.getInt("IdEvent"),
                         rs.getString("Nama"),
                         rs.getString("NamaKlien"),
